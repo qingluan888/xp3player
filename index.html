@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青鸾网络</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: url('https://i.postimg.cc/y8snsF7K/3-00.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            font-family: '微软雅黑', sans-serif;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .header button {
+            position: absolute;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .countdown {
+            text-align: center;
+            padding: 15px;
+            font-family: '华文彩云', cursive;
+            font-size: 1.3em;
+            color: #000;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.3);
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        .module {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* 弹窗系统 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85);
+            padding: 30px;
+            border-radius: 15px;
+            color: white;
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .modal-bg {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* 其他样式 */
+        .copy-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            margin: 20px 0;
+            animation: flow 2s infinite;
+        }
+
+        #previewImage {
+            max-width: 80vw;
+            max-height: 80vh;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        @keyframes flow {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主页面 -->
+    <div class="header">
+        <h1>青鸾网络</h1>
+        <button onclick="showLogin()">管理</button>
+    </div>
+
+    <div class="countdown" id="countdown"></div>
+
+    <!-- 下载模块 -->
+    <div class="module">
+        <h2>xp3player下载看这里，请仔细看完下载步骤，不看完步骤下载不到</h2>
+        <img src="https://i.postimg.cc/Jzr5hf2Y/9999.jpg" style="width:100%; margin:10px 0; border-radius:10px;">
+        <ol>
+            <li>打开AppStor拉到最下面，退出自己的账号</li>
+            <li>复制我们的账号密码登录AppStor</li>
+            <li>登录时选择 <span style="color:red">其他选项-不升级</span></li>
+            <li>登录上去以后点击右上角头像再点APP或者个性化推荐</li>
+            <li>找到“点我下载软件”下载xp3player</li>
+        </ol>
+        
+        <div class="divider"></div>
+        <button class="copy-btn" onclick="copyText('account')">复制账号</button>
+        <button class="copy-btn" onclick="copyText('password')">复制密码</button>
+    </div>
+
+    <!-- 代找游戏模块 -->
+    <div class="module" onclick="showImage('https://i.postimg.cc/gcnsNz2V/1-0.jpg')">
+        <h2 style="text-align:center;">代找游戏</h2>
+    </div>
+
+    <!-- 弹窗系统 -->
+    <div class="modal" id="loginModal">
+        <h3>管理员登录</h3>
+        <input type="password" id="password" class="modal-input" placeholder="请输入密码">
+        <button class="copy-btn" onclick="checkPassword()">登录</button>
+        <button class="copy-btn" style="background:#666;" onclick="closeModals()">取消</button>
+    </div>
+
+    <div class="modal" id="adminPanel">
+        <h3>后台管理</h3>
+        <input type="password" class="modal-input" placeholder="新密码" id="newPw">
+        <input type="text" class="modal-input" placeholder="新标题" id="newTitle">
+        <input type="text" class="modal-input" placeholder="新账号" id="newAccount">
+        <input type="text" class="modal-input" placeholder="新密码" id="newUserPw">
+        <button class="copy-btn" onclick="saveSettings()">保存设置</button>
+        <button class="copy-btn" style="background:#666;" onclick="closeModals()">取消</button>
+    </div>
+
+    <div class="modal" id="imageModal">
+        <img id="previewImage">
+    </div>
+
+    <div class="modal" id="alertModal">
+        <p id="alertMessage" style="margin: auto;"></p>
+    </div>
+
+    <div class="modal-bg" id="modalBg" onclick="closeModals()"></div>
+
+<script>
+    // 配置数据
+    let config = JSON.parse(localStorage.getItem('config')) || {
+        password: 'admin123',
+        title: '青鸾网络',
+        account: 'test@example.com',
+        userPassword: '12345678'
+    };
+
+    // 初始化页面
+    function initPage() {
+        document.querySelector('h1').textContent = config.title;
+    }
+    initPage();
+
+    // 倒计时功能
+    let startTime = localStorage.getItem('startTime') || Date.now();
+    localStorage.setItem('startTime', startTime);
+
+    function updateTimer() {
+        const remain = 86400000 - (Date.now() - startTime);
+        if(remain <= 0) {
+            document.body.innerHTML = `<div style="text-align:center; padding:50px; color:red;">
+                此文档已过时失效，请联系作者Q：475798944
+            </div>`;
+            return;
+        }
+        const h = Math.floor(remain/3600000);
+        const m = Math.floor((remain%3600000)/60000);
+        const s = Math.floor((remain%60000)/1000);
+        document.getElementById('countdown').textContent = `距离失效还剩 ${h}小时${m}分${s}秒`;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    // 图片弹窗
+    function showImage(url) {
+        document.getElementById('previewImage').src = url;
+        showModal('imageModal');
+    }
+
+    // 复制功能
+    function copyText(type) {
+        const text = type === 'account' ? config.account : config.userPassword;
+        const input = document.createElement('textarea');
+        input.value = text;
+        document.body.appendChild(input);
+        input.select();
+        try {
+            document.execCommand('copy');
+            showAlert('✓ 复制成功', 'success');
+        } catch {
+            showAlert('⚠ 复制失败，请手动选择', 'error');
+        }
+        document.body.removeChild(input);
+    }
+
+    // 弹窗控制
+    function showModal(id) {
+        document.getElementById(id).style.display = 'block';
+        document.getElementById('modalBg').style.display = 'block';
+        if(id === 'loginModal') {
+            document.getElementById('password').value = '';
+        }
+    }
+
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        document.getElementById('modalBg').style.display = 'none';
+    }
+
+    // 提示弹窗
+    function showAlert(msg, type) {
+        const alert = document.getElementById('alertModal');
+        const message = document.getElementById('alertMessage');
+        message.textContent = msg;
+        message.style.color = type === 'success' ? '#4CAF50' : '#f44336';
+        alert.style.display = 'block';
+        document.getElementById('modalBg').style.display = 'block';
+        setTimeout(() => {
+            alert.style.display = 'none';
+            document.getElementById('modalBg').style.display = 'none';
+        }, 2000);
+    }
+
+    // 管理功能
+    function showLogin() {
+        showModal('loginModal');
+    }
+
+    function checkPassword() {
+        if(document.getElementById('password').value === config.password) {
+            showModal('adminPanel');
+        } else {
+            showAlert('⚠ 密码错误', 'error');
+        }
+    }
+
+    function saveSettings() {
+        config.password = document.getElementById('newPw').value || config.password;
+        config.title = document.getElementById('newTitle').value || config.title;
+        config.account = document.getElementById('newAccount').value || config.account;
+        config.userPassword = document.getElementById('newUserPw').value || config.userPassword;
+        
+        localStorage.setItem('config', JSON.stringify(config));
+        initPage();
+        showAlert('✓ 设置保存成功', 'success');
+        closeModals();
+    }
+</script>
+</body>
+</html>
