@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>青鸾网络</title>
     <style>
+        /* 所有样式保持原样不变 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -57,7 +58,6 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* 弹窗系统 */
         .modal {
             display: none;
             position: fixed;
@@ -96,7 +96,6 @@
             font-size: 16px;
         }
 
-        /* 其他样式 */
         .copy-btn {
             display: block;
             width: 100%;
@@ -132,7 +131,7 @@
     </style>
 </head>
 <body>
-    <!-- 主页面 -->
+    <!-- 页面结构保持不变 -->
     <div class="header">
         <h1>青鸾网络</h1>
         <button onclick="showLogin()">管理</button>
@@ -140,12 +139,11 @@
 
     <div class="countdown" id="countdown"></div>
 
-    <!-- 下载模块 -->
     <div class="module">
-        <h2>xp3player下载看这里，请仔细看完下载步骤，不看完步骤下载不到</h2>
+        <h2>xp3player下载看这里，请仔细看完下载步骤，不看完步骤下载不到软件哦</h2>
         <img src="https://i.postimg.cc/Jzr5hf2Y/9999.jpg" style="width:100%; margin:10px 0; border-radius:10px;">
         <ol>
-            <li>您购买的是单次下载，请在24小时内完成下载安装软件，过时不补，删除卸载不补</li>
+			<li>单次下载用户，请在24小时内完成下载安装软件，过时不补，删除卸载不补，永久更新用户请看文档进售后更新群</li>
             <li>打开AppStor拉到最下面，退出自己的账号</li>
             <li>复制我们的账号密码登录AppStor</li>
             <li>登录时选择 <span style="color:red">其他选项-不升级</span></li>
@@ -158,12 +156,11 @@
         <button class="copy-btn" onclick="copyText('password')">复制密码</button>
     </div>
 
-    <!-- 代找游戏模块 -->
     <div class="module" onclick="showImage('https://i.postimg.cc/gcnsNz2V/1-0.jpg')">
         <h2 style="text-align:center;">代找游戏</h2>
     </div>
 
-    <!-- 弹窗系统 -->
+    <!-- 弹窗系统保持不变 -->
     <div class="modal" id="loginModal">
         <h3>管理员登录</h3>
         <input type="password" id="password" class="modal-input" placeholder="请输入密码">
@@ -200,6 +197,11 @@
         userPassword: '12345678'
     };
 
+    // 新增修复函数：显示登录窗口
+    function showLogin() {
+        showModal('loginModal');
+    }
+
     // 初始化页面
     function initPage() {
         document.querySelector('h1').textContent = config.title;
@@ -207,32 +209,56 @@
     initPage();
 
     // 倒计时功能
-    let startTime = localStorage.getItem('startTime') || Date.now();
-    localStorage.setItem('startTime', startTime);
-
     function updateTimer() {
-        const remain = 86400000 - (Date.now() - startTime);
-        if(remain <= 0) {
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        let remain;
+        
+        if (isAdmin) {
+            const adminStartTime = parseInt(localStorage.getItem('adminStartTime')) || Date.now();
+            localStorage.setItem('adminStartTime', adminStartTime);
+            remain = 31536000000 - (Date.now() - adminStartTime);
+        } else {
+            const userStartTime = parseInt(localStorage.getItem('userStartTime')) || Date.now();
+            localStorage.setItem('userStartTime', userStartTime);
+            remain = 86400000 - (Date.now() - userStartTime);
+        }
+
+        if (!isAdmin && remain <= 0) {
             document.body.innerHTML = `<div style="text-align:center; padding:50px; color:red;">
                 此文档已过时失效，请联系作者Q：475798944
             </div>`;
             return;
         }
+
         const h = Math.floor(remain/3600000);
         const m = Math.floor((remain%3600000)/60000);
         const s = Math.floor((remain%60000)/1000);
-        document.getElementById('countdown').textContent = `距离失效还剩 ${h}小时${m}分${s}秒`;
+
+        document.getElementById('countdown').textContent = isAdmin 
+            ? `管理员模式有效期：${Math.floor(h/24)}天${h%24}小时${m}分${s}秒` 
+            : `距离失效还剩 ${h}小时${m}分${s}秒`;
     }
+
     setInterval(updateTimer, 1000);
     updateTimer();
 
-    // 图片弹窗
+    // 密码验证
+    function checkPassword() {
+        if(document.getElementById('password').value === config.password) {
+            localStorage.setItem('isAdmin', 'true');
+            localStorage.setItem('adminStartTime', Date.now());
+            showModal('adminPanel');
+        } else {
+            showAlert('⚠ 密码错误', 'error');
+        }
+    }
+
+    // 以下所有功能保持原样不变
     function showImage(url) {
         document.getElementById('previewImage').src = url;
         showModal('imageModal');
     }
 
-    // 复制功能
     function copyText(type) {
         const text = type === 'account' ? config.account : config.userPassword;
         const input = document.createElement('textarea');
@@ -241,14 +267,13 @@
         input.select();
         try {
             document.execCommand('copy');
-            showAlert('✓ 复制成功', 'success');
+            showAlert('❤ 复制成功 ❤', 'success');
         } catch {
             showAlert('⚠ 复制失败，请手动选择', 'error');
         }
         document.body.removeChild(input);
     }
 
-    // 弹窗控制
     function showModal(id) {
         document.getElementById(id).style.display = 'block';
         document.getElementById('modalBg').style.display = 'block';
@@ -262,7 +287,6 @@
         document.getElementById('modalBg').style.display = 'none';
     }
 
-    // 提示弹窗
     function showAlert(msg, type) {
         const alert = document.getElementById('alertModal');
         const message = document.getElementById('alertMessage');
@@ -274,19 +298,6 @@
             alert.style.display = 'none';
             document.getElementById('modalBg').style.display = 'none';
         }, 2000);
-    }
-
-    // 管理功能
-    function showLogin() {
-        showModal('loginModal');
-    }
-
-    function checkPassword() {
-        if(document.getElementById('password').value === config.password) {
-            showModal('adminPanel');
-        } else {
-            showAlert('⚠ 密码错误', 'error');
-        }
     }
 
     function saveSettings() {
